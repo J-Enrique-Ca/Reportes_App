@@ -79,7 +79,7 @@ class _ReportesAppState extends State<ReportesApp> {
                       ),
                       trailing: const Icon(Icons.arrow_forward_ios, color: Colors.deepPurple),
                       onTap: () {
-                        // Aquí podrías abrir detalles del reporte
+                        
                       },
                     ),
                   );
