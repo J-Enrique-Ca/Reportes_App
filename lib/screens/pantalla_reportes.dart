@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../models/report.dart';
+import '../services/report_service.dart';
 import '../widgets/report_card.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/custom_input.dart';
@@ -12,27 +13,28 @@ class PantallaReportes extends StatefulWidget {
 }
 
 class _PantallaReportesState extends State<PantallaReportes> {
-  final List<Report> _reportes = [
-    Report(
-      id: '1',
-      nombreUsuario: 'Enrique Castro ',
-      ubicacion: 'Centro de la ciudad',
-      descripcion: 'Problema con el alumbrado público en la calle principal',
-      imagenUrl:
-          'https://cdn-icons-png.flaticon.com/512/685/685655.png', 
-      fecha: DateTime.now().subtract(const Duration(hours: 2)),
-    ),
-    Report(
-      id: '2',
-      nombreUsuario: 'Elvira Diaz',
-      ubicacion: 'Parque Central',
-      descripcion:
-          'Basura acumulada en el parque ',
-      imagenUrl:
-          'https://cdn-icons-png.flaticon.com/512/415/415733.png',
-      fecha: DateTime.now().subtract(const Duration(hours: 4)),
-    ),
-  ];
+  final ReportService _service = ReportService();
+  List<Report> _reportes = [];
+  bool _cargando = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _cargarReportes();
+  }
+
+  Future<void> _cargarReportes() async {
+    try {
+      final data = await _service.obtenerReportes();
+      setState(() {
+        _reportes = data;
+        _cargando = false;
+      });
+    } catch (e) {
+      print('Error al cargar reportes: $e');
+      setState(() => _cargando = false);
+    }
+  }
 
   void _mostrarDialogoAgregar() {
     final _nombreCtrl = TextEditingController();
@@ -100,18 +102,20 @@ class _PantallaReportesState extends State<PantallaReportes> {
           ),
         ],
       ),
-      body: ListView.builder(
-        itemCount: _reportes.length,
-        itemBuilder: (context, i) {
-          final r = _reportes[i];
-          return ReportCard(
-            reporte: r,
-            onLike: () {},
-            onComment: () {},
-            onShare: () {},
-          );
-        },
-      ),
+      body: _cargando
+          ? const Center(child: CircularProgressIndicator())
+          : ListView.builder(
+              itemCount: _reportes.length,
+              itemBuilder: (context, i) {
+                final r = _reportes[i];
+                return ReportCard(
+                  reporte: r,
+                  onLike: () {},
+                  onComment: () {},
+                  onShare: () {},
+                );
+              },
+            ),
     );
   }
 }
